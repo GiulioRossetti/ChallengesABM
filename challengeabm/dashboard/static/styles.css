@@ -247,7 +247,7 @@ summary {
 
 .workflow-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .layout-row {
