@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "challengeabm"
+version = "0.1.0"
+description = "Agent-based model of risky online challenge diffusion among adolescents"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "networkx>=3.0",
+    "matplotlib>=3.7",
+    "numpy>=1.23",
+]
+
+[tool.setuptools]
+packages = ["challengeabm"]

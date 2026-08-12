@@ -1,0 +1,9 @@
+site_name: ChallengeABM
+nav:
+  - Home: index.md
+  - Model: model.md
+  - Usage: usage.md
+  - Visualization: visualization.md
+  - API Reference: api.md
+theme:
+  name: mkdocs
