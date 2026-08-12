@@ -1,6 +1,7 @@
 site_name: ChallengeABM
 nav:
   - Home: index.md
+  - Dashboard: dashboard.md
   - Model: model.md
   - Usage: usage.md
   - Visualization: visualization.md

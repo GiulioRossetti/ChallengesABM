@@ -17,6 +17,30 @@ python -m pip install -e .
 
 The package depends on `networkx`, `numpy`, and `matplotlib`.
 
+## Interactive Dashboard
+
+ChallengeABM includes a local browser dashboard for configuration, simulation, and replay.
+
+Launch it from the repository root with:
+
+```bash
+python -m challengeabm.dashboard.server
+```
+
+If the package is installed, you can also use:
+
+```bash
+challengeabm-dashboard
+```
+
+The dashboard provides:
+
+- topology presets for quick graph generation;
+- editable simulation, challenge, transition, and trait-distribution settings;
+- a three-step flow: create the network, pick seeds by clicking nodes, then run the simulation;
+- a playable JavaScript network visualization;
+- trend and density plots that update as you scrub through time.
+
 ## Compartmental Diagram
 
 ![ChallengeABM compartmental model](docs/assets/compartmental_model.png)
@@ -25,12 +49,12 @@ The figure summarizes the states and the main transition rules in one place. Rea
 
 ### Transition Legend
 
-- `U -> O`: awareness. An unaware agent becomes observing when nearby `P` or `A` neighbors create enough exposure.
-- `O -> P`: participation. An observing agent joins the challenge when challenge appeal, susceptibility, conformity, and local exposure outweigh risk aversion.
-- `O -> C`: counteraction. An observing agent starts opposing the challenge when perceived risk and exposure make resistance more likely.
-- `P -> A`: amplification. A participant becomes an amplifier when sharing tendency, conformity, and exposure favor public promotion.
-- `P -> D`: dropout. A participant leaves the challenge when risk aversion, challenge severity, and low retention pressure push exit probability up.
-- `A -> D`: dropout from amplification. Amplifiers can also leave the cascade under the same dropout logic used for participants.
+- `U -> O`: [awareness probability](docs/model.md#awareness-probability). An unaware agent becomes observing when nearby `P` or `A` neighbors create enough exposure.
+- `O -> P`: [participation probability](docs/model.md#participation-probability). An observing agent joins the challenge when challenge appeal, susceptibility, conformity, and local exposure outweigh risk aversion.
+- `O -> C`: [counteraction probability](docs/model.md#counteraction-probability). An observing agent starts opposing the challenge when perceived risk and exposure make resistance more likely.
+- `P -> A`: [amplification probability](docs/model.md#amplification-probability). A participant becomes an amplifier when sharing tendency, conformity, and exposure favor public promotion.
+- `P -> D`: [dropout probability](docs/model.md#dropout-probability). A participant leaves the challenge when risk aversion, challenge severity, and low retention pressure push exit probability up.
+- `A -> D`: [dropout probability](docs/model.md#dropout-probability). Amplifiers can also leave the cascade under the same dropout logic used for participants.
 - `C -> C`: counteracting is absorbing in the current implementation. Once an agent starts counteracting, it remains in that state.
 - `D -> D`: dropped out is absorbing. Once an agent exits, it does not re-enter the cascade.
 
@@ -47,8 +71,8 @@ ChallengeABM(
 )
 ```
 
-`peer_network` is required. The graph is copied, relabeled internally to consecutive integer node ids, and used as the social network for the simulation.
-`infected_nodes`, when provided, overrides random seeding and marks the listed nodes as the initial observing agents.
+`peer_network` is required. The graph is copied, but its original node labels are preserved and used throughout the simulation. Edge weights are kept when present and missing weights default to `1.0`.
+`infected_nodes`, when provided, overrides random seeding and marks the listed original node labels as the initial observing agents.
 
 ### `SimulationConfig`
 
@@ -126,7 +150,7 @@ model = ChallengeABM(peer_network=graph, infected_nodes=[0, 4, 7])
 
 The model will:
 
-- normalize node labels to `0..N-1`;
+- preserve the node labels from your original graph;
 - preserve edge weights when present;
 - default missing edge weights to `1.0`;
 - convert the graph to a simple undirected graph for the diffusion rules.

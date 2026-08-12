@@ -11,6 +11,7 @@ The workflow is:
 
 ## Start Here
 
+- [Dashboard](dashboard.md)
 - [Usage](usage.md)
 - [API Reference](api.md)
 - [Visualization](visualization.md)
@@ -29,12 +30,12 @@ flowchart LR
 
 The arrows in the compartmental diagram mean:
 
-- `U -> O`: awareness from nearby participation or amplification.
-- `O -> P`: adoption of the challenge.
-- `O -> C`: counteraction starts.
-- `P -> A`: participation turns into amplification.
-- `P -> D`: participation ends in dropout.
-- `A -> D`: amplification ends in dropout.
+- `U -> O`: [awareness probability](model.md#awareness-probability) from nearby participation or amplification.
+- `O -> P`: [participation probability](model.md#participation-probability) for challenge adoption.
+- `O -> C`: [counteraction probability](model.md#counteraction-probability) for protective response.
+- `P -> A`: [amplification probability](model.md#amplification-probability) for resharing and promotion.
+- `P -> D`: [dropout probability](model.md#dropout-probability) for leaving the challenge.
+- `A -> D`: [dropout probability](model.md#dropout-probability) for amplifiers exiting the cascade.
 - `C -> C` and `D -> D`: absorbing states in the current model.
 
 ## Minimal Example

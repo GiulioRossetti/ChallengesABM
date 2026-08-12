@@ -47,11 +47,11 @@ class ChallengeABMTests(unittest.TestCase):
         model = ChallengeABM(config=config, peer_network=custom_graph)
 
         self.assertEqual(model.graph.number_of_nodes(), 4)
-        self.assertEqual(set(model.graph.nodes()), {0, 1, 2, 3})
+        self.assertEqual(set(model.graph.nodes()), {"alice", "bob", "carol", "diana"})
         self.assertEqual(model.n_agents, 4)
-        self.assertEqual(model.graph[0][1]["weight"], 0.8)
-        self.assertEqual(model.graph[1][2]["weight"], 1.0)
-        self.assertEqual(model.graph[2][3]["weight"], 0.4)
+        self.assertEqual(model.graph["alice"]["bob"]["weight"], 0.8)
+        self.assertEqual(model.graph["bob"]["carol"]["weight"], 1.0)
+        self.assertEqual(model.graph["carol"]["diana"]["weight"], 0.4)
 
         result = model.run()
         self.assertEqual(result.time_steps, 1)
@@ -62,12 +62,11 @@ class ChallengeABMTests(unittest.TestCase):
         config = SimulationConfig(seed_count=1, steps=0, random_seed=5)
         model = ChallengeABM(peer_network=graph, infected_nodes=["b", "d"], config=config)
 
-        observed = [agent.agent_id for agent in model.agents if agent.state == State.OBSERVING]
+        observed = [model.node_labels[agent.agent_id] for agent in model.agents if agent.state == State.OBSERVING]
         self.assertEqual(len(observed), 2)
         self.assertEqual(sum(agent.ever_exposed for agent in model.agents), 2)
-
-        original_labels = {data["original_label"] for _, data in model.graph.nodes(data=True)}
-        self.assertEqual(original_labels, {"a", "b", "c", "d", "e"})
+        self.assertEqual(set(observed), {"b", "d"})
+        self.assertEqual(set(model.graph.nodes()), {"a", "b", "c", "d", "e"})
 
     def test_model_uses_custom_trait_distributions(self) -> None:
         graph = nx.path_graph(8)

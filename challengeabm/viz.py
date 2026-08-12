@@ -137,8 +137,12 @@ def plot_network_snapshot(
     """Plot the peer network colored by each agent's current state."""
 
     graph = model.graph
-    node_colors = [STATE_COLORS[agent.state.value] for agent in model.agents]
-    node_sizes = [55 + 130 * agent.share_tendency for agent in model.agents]
+    nodelist = list(graph.nodes())
+    node_colors = [
+        STATE_COLORS[model.agents[model.node_to_agent_index[node]].state.value]
+        for node in nodelist
+    ]
+    node_sizes = [55 + 130 * model.agents[model.node_to_agent_index[node]].share_tendency for node in nodelist]
 
     if layout == "spring":
         positions = nx.spring_layout(graph, seed=42, weight="weight")
@@ -156,6 +160,7 @@ def plot_network_snapshot(
         graph,
         positions,
         ax=ax,
+        nodelist=nodelist,
         node_color=node_colors,
         node_size=node_sizes,
         linewidths=0.4,
@@ -163,7 +168,7 @@ def plot_network_snapshot(
     )
 
     if with_labels and graph.number_of_nodes() <= 80:
-        nx.draw_networkx_labels(graph, positions, ax=ax, font_size=7)
+        nx.draw_networkx_labels(graph, positions, ax=ax, labels={node: str(node) for node in nodelist}, font_size=7)
 
     ax.set_title("Peer network snapshot")
     ax.set_axis_off()
@@ -201,4 +206,3 @@ def create_dashboard(
 
     fig.suptitle("ChallengeABM simulation dashboard", fontsize=16, fontweight="bold")
     return fig
-

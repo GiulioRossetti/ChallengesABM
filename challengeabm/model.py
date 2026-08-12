@@ -39,12 +39,12 @@ class ChallengeABM:
         self.rng = random.Random(self.config.random_seed)
         self._state_counts_history: list[dict[str, int]] = []
         self.graph = prepare_custom_network(self.peer_network)
-        self.n_agents = self.graph.number_of_nodes()
-        self._original_label_to_node = {
-            data.get("original_label", node): node for node, data in self.graph.nodes(data=True)
-        }
+        self.node_labels = list(self.graph.nodes())
+        self.node_to_agent_index = {node_label: index for index, node_label in enumerate(self.node_labels)}
+        self.n_agents = len(self.node_labels)
         self.agents = self._build_agents()
-        self._seed_initial_observers()
+        self.seed_nodes = self._initial_seed_nodes()
+        self._seed_initial_observers(self.seed_nodes)
         self._record_current_states()
 
     def _build_agents(self) -> list[Agent]:
@@ -100,52 +100,51 @@ class ChallengeABM:
             value = max(0.0, min(1.0, value))
         return value
 
-    def _seed_initial_observers(self) -> None:
-        seed_nodes = self._initial_seed_nodes()
-        for node_index in seed_nodes:
-            agent = self.agents[node_index]
+    def _seed_initial_observers(self, seed_nodes: Sequence[Hashable]) -> None:
+        for node_label in seed_nodes:
+            agent = self.agents[self.node_to_agent_index[node_label]]
             agent.state = State.OBSERVING
             agent.ever_exposed = True
             agent.time_of_entry = 0
 
-    def _initial_seed_nodes(self) -> list[int]:
+    def _initial_seed_nodes(self) -> list[Hashable]:
         if self.infected_nodes is not None:
             return self._normalize_infected_nodes(self.infected_nodes)
         seed_count = min(self.config.seed_count, self.n_agents)
-        return self.rng.sample(range(self.n_agents), seed_count)
+        return self.rng.sample(self.node_labels, seed_count)
 
-    def _normalize_infected_nodes(self, infected_nodes: Sequence[Hashable]) -> list[int]:
-        normalized: list[int] = []
-        seen: set[int] = set()
+    def _normalize_infected_nodes(self, infected_nodes: Sequence[Hashable]) -> list[Hashable]:
+        normalized: list[Hashable] = []
+        seen: set[Hashable] = set()
         for node in infected_nodes:
-            if node not in self._original_label_to_node:
+            if node not in self.node_to_agent_index:
                 raise ValueError(f"infected node {node!r} is not present in the provided graph")
-            node_index = self._original_label_to_node[node]
-            if node_index not in seen:
-                normalized.append(node_index)
-                seen.add(node_index)
+            if node not in seen:
+                normalized.append(node)
+                seen.add(node)
         return normalized
 
-    def _neighbor_weights(self, agent_id: int) -> float:
+    def _neighbor_weights(self, node_label: Hashable) -> float:
         total = 0.0
-        for neighbor in self.graph.neighbors(agent_id):
-            total += self.graph[agent_id][neighbor]["weight"]
+        for neighbor in self.graph.neighbors(node_label):
+            total += self.graph[node_label][neighbor]["weight"]
         return total
 
-    def _weighted_fraction(self, agent_id: int, target_states: set[State]) -> float:
-        total_weight = self._neighbor_weights(agent_id)
+    def _weighted_fraction(self, node_label: Hashable, target_states: set[State]) -> float:
+        total_weight = self._neighbor_weights(node_label)
         if total_weight == 0:
             return 0.0
         numerator = 0.0
-        for neighbor in self.graph.neighbors(agent_id):
-            if self.agents[neighbor].state in target_states:
-                numerator += self.graph[agent_id][neighbor]["weight"]
+        for neighbor in self.graph.neighbors(node_label):
+            neighbor_index = self.node_to_agent_index[neighbor]
+            if self.agents[neighbor_index].state in target_states:
+                numerator += self.graph[node_label][neighbor]["weight"]
         return numerator / total_weight
 
-    def _exposure(self, agent_id: int) -> tuple[float, float, float]:
-        exposure_participating = self._weighted_fraction(agent_id, {State.PARTICIPATING})
-        exposure_amplifying = self._weighted_fraction(agent_id, {State.AMPLIFYING})
-        exposure_counteracting = self._weighted_fraction(agent_id, {State.COUNTERACTING})
+    def _exposure(self, node_label: Hashable) -> tuple[float, float, float]:
+        exposure_participating = self._weighted_fraction(node_label, {State.PARTICIPATING})
+        exposure_amplifying = self._weighted_fraction(node_label, {State.AMPLIFYING})
+        exposure_counteracting = self._weighted_fraction(node_label, {State.COUNTERACTING})
         return exposure_participating, exposure_amplifying, exposure_counteracting
 
     def awareness_probability(self, exposure_participating: float, exposure_amplifying: float) -> float:
@@ -233,7 +232,8 @@ class ChallengeABM:
         next_states: list[State] = [agent.state for agent in self.agents]
 
         for agent in self.agents:
-            exposure_participating, exposure_amplifying, exposure_counteracting = self._exposure(agent.agent_id)
+            node_label = self.node_labels[agent.agent_id]
+            exposure_participating, exposure_amplifying, exposure_counteracting = self._exposure(node_label)
             effective_exposure = self.effective_exposure(
                 exposure_participating,
                 exposure_amplifying,
@@ -313,7 +313,7 @@ class ChallengeABM:
 
         final_reach = ever_participated / self.n_agents if self.n_agents else 0.0
         large_cascade = final_reach > self.config.large_cascade_threshold
-        largest_cluster = participating_cluster_size(self.graph, states)
+        largest_cluster = participating_cluster_size(self.graph, states, self.node_labels)
 
         return SimulationResult(
             time_steps=time_steps,

@@ -14,5 +14,11 @@ dependencies = [
     "numpy>=1.23",
 ]
 
+[project.scripts]
+challengeabm-dashboard = "challengeabm.dashboard.server:main"
+
 [tool.setuptools]
-packages = ["challengeabm"]
+packages = ["challengeabm", "challengeabm.dashboard"]
+
+[tool.setuptools.package-data]
+"challengeabm.dashboard" = ["static/*"]

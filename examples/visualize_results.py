@@ -23,7 +23,7 @@ from challengeabm.viz import (
 
 
 def main() -> None:
-    output_dir = Path("artifacts")
+    output_dir = Path(__file__).resolve().parents[1] / "artifacts"
     output_dir.mkdir(exist_ok=True)
 
     graph = nx.watts_strogatz_graph(n=80, k=8, p=0.1, seed=42)

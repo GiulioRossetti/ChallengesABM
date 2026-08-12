@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChallengeABM Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ChallengeABM interactive dashboard</p>
+          <h1>Configure, simulate, and replay challenge diffusion</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="reset-btn" class="secondary" type="button">Reset dashboard</button>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        <aside class="panel config-panel">
+          <details id="step-network" class="card step-card" open>
+            <summary>
+              <div class="step-heading">
+                <span class="step-badge">A</span>
+                <div>
+                  <h2>Network creation</h2>
+                  <p>Create the graph before configuring or running the model.</p>
+                </div>
+              </div>
+            </summary>
+            <div class="step-body">
+              <label>
+                Topology
+                <select id="topology-kind">
+                  <option value="watts_strogatz">Watts-Strogatz</option>
+                  <option value="erdos_renyi">Erdos-Renyi</option>
+                  <option value="barabasi_albert">Barabasi-Albert</option>
+                  <option value="newman_watts_strogatz">Newman-Watts-Strogatz</option>
+                  <option value="powerlaw_cluster">Powerlaw Cluster</option>
+                  <option value="sbm">Stochastic Block Model</option>
+                  <option value="lfr">LFR Benchmark</option>
+                  <option value="path">Path</option>
+                </select>
+              </label>
+              <div class="topology-fields" data-topology="watts_strogatz">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-ws-n" type="number" min="3" step="1" value="120" />
+                  </label>
+                  <label>
+                    k
+                    <input id="topology-ws-k" type="number" min="2" step="1" value="8" />
+                  </label>
+                </div>
+                <label>
+                  Rewiring probability
+                  <input id="topology-ws-p" type="number" min="0" max="1" step="0.01" value="0.08" />
+                </label>
+              </div>
+              <div class="topology-fields hidden" data-topology="erdos_renyi">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-er-n" type="number" min="3" step="1" value="120" />
+                  </label>
+                  <label>
+                    Edge probability
+                    <input id="topology-er-p" type="number" min="0" max="1" step="0.01" value="0.03" />
+                  </label>
+                </div>
+              </div>
+              <div class="topology-fields hidden" data-topology="barabasi_albert">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-ba-n" type="number" min="3" step="1" value="120" />
+                  </label>
+                  <label>
+                    Attachments per node
+                    <input id="topology-ba-m" type="number" min="1" step="1" value="4" />
+                  </label>
+                </div>
+              </div>
+              <div class="topology-fields hidden" data-topology="newman_watts_strogatz">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-nws-n" type="number" min="3" step="1" value="120" />
+                  </label>
+                  <label>
+                    k
+                    <input id="topology-nws-k" type="number" min="2" step="1" value="8" />
+                  </label>
+                </div>
+                <label>
+                  Shortcut probability
+                  <input id="topology-nws-p" type="number" min="0" max="1" step="0.01" value="0.08" />
+                </label>
+              </div>
+              <div class="topology-fields hidden" data-topology="powerlaw_cluster">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-pc-n" type="number" min="3" step="1" value="120" />
+                  </label>
+                  <label>
+                    Attachments per node
+                    <input id="topology-pc-m" type="number" min="1" step="1" value="4" />
+                  </label>
+                </div>
+                <label>
+                  Triad formation probability
+                  <input id="topology-pc-p" type="number" min="0" max="1" step="0.01" value="0.08" />
+                </label>
+              </div>
+              <div class="topology-fields hidden" data-topology="sbm">
+                <label>
+                  Block sizes
+                  <textarea id="topology-sbm-sizes" spellcheck="false">[40, 40, 40]</textarea>
+                </label>
+                <label>
+                  Block probabilities
+                  <textarea id="topology-sbm-probabilities" spellcheck="false">[[0.14, 0.03, 0.02], [0.03, 0.13, 0.03], [0.02, 0.03, 0.12]]</textarea>
+                </label>
+              </div>
+              <div class="topology-fields hidden" data-topology="lfr">
+                <div class="row">
+                  <label>
+                    Nodes
+                    <input id="topology-lfr-n" type="number" min="10" step="1" value="120" />
+                  </label>
+                  <label>
+                    tau1
+                    <input id="topology-lfr-tau1" type="number" min="1.01" step="0.1" value="3" />
+                  </label>
+                </div>
+                <div class="row">
+                  <label>
+                    tau2
+                    <input id="topology-lfr-tau2" type="number" min="1.01" step="0.1" value="1.5" />
+                  </label>
+                  <label>
+                    mu
+                    <input id="topology-lfr-mu" type="number" min="0" max="1" step="0.01" value="0.1" />
+                  </label>
+                </div>
+                <div class="row">
+                  <label>
+                    Average degree
+                    <input id="topology-lfr-average-degree" type="number" min="0" step="1" value="6" />
+                  </label>
+                  <label>
+                    Min degree
+                    <input id="topology-lfr-min-degree" type="number" min="0" step="1" value="" />
+                  </label>
+                </div>
+                <div class="row">
+                  <label>
+                    Min community
+                    <input id="topology-lfr-min-community" type="number" min="2" step="1" value="5" />
+                  </label>
+                  <label>
+                    Max community
+                    <input id="topology-lfr-max-community" type="number" min="2" step="1" value="" />
+                  </label>
+                </div>
+                <label>
+                  Max iterations
+                  <input id="topology-lfr-max-iters" type="number" min="1" step="1" value="500" />
+                </label>
+              </div>
+              <button id="create-network-btn" class="primary" type="button">Create network</button>
+            </div>
+          </details>
+
+          <details id="step-model" class="card step-card">
+            <summary>
+              <div class="step-heading">
+                <span class="step-badge">B</span>
+                <div>
+                  <h2>Model configuration</h2>
+                  <p>Adjust the challenge and choose seeds by clicking the graph.</p>
+                </div>
+              </div>
+            </summary>
+            <div class="step-body">
+              <div class="row">
+                <label>
+                  Steps
+                  <input id="simulation-steps" type="number" min="1" step="1" value="60" />
+                </label>
+                <label>
+                  Seeds
+                  <input id="simulation-seed-count" type="number" min="0" step="1" value="4" />
+                </label>
+              </div>
+              <label>
+                Random seed
+                <input id="simulation-random-seed" type="number" step="1" value="42" />
+              </label>
+              <div class="seed-panel">
+                <label>
+                  Selected seeds
+                  <input id="selected-seeds" type="text" readonly placeholder="Click nodes in the graph" />
+                </label>
+                <div class="seed-actions">
+                  <button id="clear-seeds-btn" class="secondary" type="button">Clear selected seeds</button>
+                </div>
+              </div>
+              <div class="row">
+                <label>
+                  Appeal
+                  <input id="challenge-appeal" type="number" min="0" max="1" step="0.01" value="0.55" />
+                </label>
+                <label>
+                  Severity
+                  <input id="challenge-severity" type="number" min="0" max="1" step="0.01" value="0.65" />
+                </label>
+              </div>
+              <div class="workflow-actions">
+                <button id="configure-btn" class="primary" type="button">Configure model</button>
+              </div>
+              <details id="advanced-config" class="config-details">
+                <summary>Advanced configuration</summary>
+                <div class="config-body">
+                  <details open>
+                    <summary>Transition parameters</summary>
+                    <div class="config-group">
+                      <div class="config-group-heading">
+                        <h3>Awareness</h3>
+                      </div>
+                      <div class="row">
+                        <label>
+                          awareness_lambda
+                          <input id="transition-awareness-lambda" type="number" step="0.1" min="0" value="2" />
+                        </label>
+                      </div>
+                    </div>
+                    <div class="config-group">
+                      <div class="config-group-heading">
+                        <h3>Participation</h3>
+                      </div>
+                      <div class="row">
+                        <label>
+                          intercept
+                          <input id="transition-participation-intercept" type="number" step="0.1" value="-2" />
+                        </label>
+                        <label>
+                          appeal
+                          <input id="transition-participation-appeal" type="number" step="0.1" value="1" />
+                        </label>
+                      </div>
+                      <div class="row">
+                        <label>
+                          susceptibility
+                          <input id="transition-participation-susceptibility" type="number" step="0.1" value="3" />
+                        </label>
+                        <label>
+                          conformity
+                          <input id="transition-participation-conformity" type="number" step="0.1" value="2" />
+                        </label>
+                      </div>
+                      <div class="row">
+                        <label>
+                          risk
+                          <input id="transition-participation-risk" type="number" step="0.1" value="2.5" />
+                        </label>
+                      </div>
+                    </div>
+                    <div class="config-group">
+                      <div class="config-group-heading">
+                        <h3>Amplification</h3>
+                      </div>
+                      <div class="row">
+                        <label>
+                          intercept
+                          <input id="transition-amplification-intercept" type="number" step="0.1" value="-1.5" />
+                        </label>
+                        <label>
+                          share
+                          <input id="transition-amplification-share" type="number" step="0.1" value="2" />
+                        </label>
+                      </div>
+                      <div class="row">
+                        <label>
+                          exposure
+                          <input id="transition-amplification-exposure" type="number" step="0.1" value="1.5" />
+                        </label>
+                        <label>
+                          conformity
+                          <input id="transition-amplification-conformity" type="number" step="0.1" value="1" />
+                        </label>
+                      </div>
+                    </div>
+                    <div class="config-group">
+                      <div class="config-group-heading">
+                        <h3>Counteraction</h3>
+                      </div>
+                      <div class="row">
+                        <label>
+                          intercept
+                          <input id="transition-counter-intercept" type="number" step="0.1" value="-1" />
+                        </label>
+                        <label>
+                          risk
+                          <input id="transition-counter-risk" type="number" step="0.1" value="2" />
+                        </label>
+                      </div>
+                      <div class="row">
+                        <label>
+                          exposure
+                          <input id="transition-counter-exposure" type="number" step="0.1" value="2" />
+                        </label>
+                        <label>
+                          effectiveness
+                          <input id="transition-counter-effectiveness" type="number" step="0.1" min="0" max="1" value="0.5" />
+                        </label>
+                      </div>
+                    </div>
+                    <div class="config-group">
+                      <div class="config-group-heading">
+                        <h3>Dropout</h3>
+                      </div>
+                      <div class="row">
+                        <label>
+                          intercept
+                          <input id="transition-dropout-intercept" type="number" step="0.1" value="-1.2" />
+                        </label>
+                        <label>
+                          risk
+                          <input id="transition-dropout-risk" type="number" step="0.1" value="2" />
+                        </label>
+                      </div>
+                      <div class="row">
+                        <label>
+                          exposure
+                          <input id="transition-dropout-exposure" type="number" step="0.1" value="2" />
+                        </label>
+                        <label>
+                          spontaneous dropout
+                          <input id="transition-spontaneous-dropout" type="number" step="0.01" min="0" max="1" value="0.02" />
+                        </label>
+                      </div>
+                    </div>
+                  </details>
+                  <details>
+                    <summary>Trait distributions</summary>
+                    <div class="trait-grid">
+                      <div class="trait-card">
+                        <div class="config-group-heading">
+                          <h3>Susceptibility</h3>
+                        </div>
+                        <label>
+                          Distribution
+                          <select id="trait-susceptibility-kind">
+                            <option value="beta">Beta</option>
+                            <option value="uniform">Uniform</option>
+                            <option value="triangular">Triangular</option>
+                            <option value="normal">Normal</option>
+                            <option value="gamma">Gamma</option>
+                            <option value="lognormal">Lognormal</option>
+                          </select>
+                        </label>
+                        <div class="row">
+                          <label>
+                            Parameter 1
+                            <input id="trait-susceptibility-p1" type="number" step="0.01" value="2" />
+                          </label>
+                          <label>
+                            Parameter 2
+                            <input id="trait-susceptibility-p2" type="number" step="0.01" value="2" />
+                          </label>
+                        </div>
+                        <div class="row">
+                          <label>
+                            Parameter 3
+                            <input id="trait-susceptibility-p3" type="number" step="0.01" value="" />
+                          </label>
+                          <label class="checkbox-label">
+                            <span>Clip to [0, 1]</span>
+                            <input id="trait-susceptibility-clip" type="checkbox" checked />
+                          </label>
+                        </div>
+                      </div>
+                      <div class="trait-card">
+                        <div class="config-group-heading">
+                          <h3>Conformity</h3>
+                        </div>
+                        <label>
+                          Distribution
+                          <select id="trait-conformity-kind">
+                            <option value="beta">Beta</option>
+                            <option value="uniform">Uniform</option>
+                            <option value="triangular">Triangular</option>
+                            <option value="normal">Normal</option>
+                            <option value="gamma">Gamma</option>
+                            <option value="lognormal">Lognormal</option>
+                          </select>
+                        </label>
+                        <div class="row">
+                          <label>
+                            Parameter 1
+                            <input id="trait-conformity-p1" type="number" step="0.01" value="2" />
+                          </label>
+                          <label>
+                            Parameter 2
+                            <input id="trait-conformity-p2" type="number" step="0.01" value="2" />
+                          </label>
+                        </div>
+                        <div class="row">
+                          <label>
+                            Parameter 3
+                            <input id="trait-conformity-p3" type="number" step="0.01" value="" />
+                          </label>
+                          <label class="checkbox-label">
+                            <span>Clip to [0, 1]</span>
+                            <input id="trait-conformity-clip" type="checkbox" checked />
+                          </label>
+                        </div>
+                      </div>
+                      <div class="trait-card">
+                        <div class="config-group-heading">
+                          <h3>Risk aversion</h3>
+                        </div>
+                        <label>
+                          Distribution
+                          <select id="trait-risk-aversion-kind">
+                            <option value="beta">Beta</option>
+                            <option value="uniform">Uniform</option>
+                            <option value="triangular">Triangular</option>
+                            <option value="normal">Normal</option>
+                            <option value="gamma">Gamma</option>
+                            <option value="lognormal">Lognormal</option>
+                          </select>
+                        </label>
+                        <div class="row">
+                          <label>
+                            Parameter 1
+                            <input id="trait-risk-aversion-p1" type="number" step="0.01" value="3" />
+                          </label>
+                          <label>
+                            Parameter 2
+                            <input id="trait-risk-aversion-p2" type="number" step="0.01" value="2" />
+                          </label>
+                        </div>
+                        <div class="row">
+                          <label>
+                            Parameter 3
+                            <input id="trait-risk-aversion-p3" type="number" step="0.01" value="" />
+                          </label>
+                          <label class="checkbox-label">
+                            <span>Clip to [0, 1]</span>
+                            <input id="trait-risk-aversion-clip" type="checkbox" checked />
+                          </label>
+                        </div>
+                      </div>
+                      <div class="trait-card">
+                        <div class="config-group-heading">
+                          <h3>Share tendency</h3>
+                        </div>
+                        <label>
+                          Distribution
+                          <select id="trait-share-tendency-kind">
+                            <option value="beta">Beta</option>
+                            <option value="uniform">Uniform</option>
+                            <option value="triangular">Triangular</option>
+                            <option value="normal">Normal</option>
+                            <option value="gamma">Gamma</option>
+                            <option value="lognormal">Lognormal</option>
+                          </select>
+                        </label>
+                        <div class="row">
+                          <label>
+                            Parameter 1
+                            <input id="trait-share-tendency-p1" type="number" step="0.01" value="2" />
+                          </label>
+                          <label>
+                            Parameter 2
+                            <input id="trait-share-tendency-p2" type="number" step="0.01" value="3" />
+                          </label>
+                        </div>
+                        <div class="row">
+                          <label>
+                            Parameter 3
+                            <input id="trait-share-tendency-p3" type="number" step="0.01" value="" />
+                          </label>
+                          <label class="checkbox-label">
+                            <span>Clip to [0, 1]</span>
+                            <input id="trait-share-tendency-clip" type="checkbox" checked />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              </details>
+            </div>
+          </details>
+
+          <details id="step-simulation" class="card step-card">
+            <summary>
+              <div class="step-heading">
+                <span class="step-badge">C</span>
+                <div>
+                  <h2>Simulation execution</h2>
+                  <p>Run the model only after the network and seed set are ready.</p>
+                </div>
+              </div>
+            </summary>
+            <div class="step-body">
+              <button id="run-btn" class="primary" type="button" disabled>Run simulation</button>
+              <p id="status-label" class="status-label">Create a network to begin.</p>
+            </div>
+          </details>
+        </aside>
+
+        <section class="panel center-panel">
+          <div class="card network-card">
+            <div class="card-header">
+              <h2>Network playback</h2>
+              <div class="playback-controls">
+                <button id="step-back-btn" class="secondary" type="button">Step -1</button>
+                <button id="play-btn" class="primary" type="button">Play</button>
+                <button id="step-forward-btn" class="secondary" type="button">Step +1</button>
+                <label class="speed-control">
+                  Speed
+                  <input id="speed-range" type="range" min="0.5" max="4" step="0.5" value="1" />
+                </label>
+              </div>
+            </div>
+
+            <div class="layout-row">
+              <label>
+                Layout
+                <select id="topology-layout">
+                  <option value="spring">Spring</option>
+                  <option value="circular">Circular</option>
+                  <option value="kamada_kawai">Kamada-Kawai</option>
+                  <option value="shell">Shell</option>
+                  <option value="spectral">Spectral</option>
+                  <option value="spiral">Spiral</option>
+                  <option value="random">Random</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="timeline">
+              <input id="time-slider" type="range" min="0" max="0" value="0" />
+              <div class="timeline-meta">
+                <span id="time-label">t = 0</span>
+                <span id="time-note">Network not created yet</span>
+              </div>
+            </div>
+
+            <div id="network-placeholder" class="network-placeholder">Create a network to preview it.</div>
+            <div id="network-stage" class="network-stage hidden">
+              <svg id="network-svg" viewBox="0 0 1000 720" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+
+          <div id="plots-grid" class="plots-grid hidden">
+            <div class="card plot-card">
+              <h2>State trends</h2>
+              <canvas id="trend-canvas" width="900" height="300"></canvas>
+            </div>
+            <div class="card plot-card">
+              <h2>State density matrix</h2>
+              <canvas id="density-canvas" width="900" height="300"></canvas>
+            </div>
+            <div class="card plot-card plot-card-wide">
+              <h2>Agent state trajectory map</h2>
+              <canvas id="trajectory-canvas" width="900" height="300"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel stats-panel">
+          <section class="card">
+            <h2>Run summary</h2>
+            <dl id="summary-list" class="summary-list"></dl>
+            <h2>Current counts</h2>
+            <div id="counts-list" class="counts-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

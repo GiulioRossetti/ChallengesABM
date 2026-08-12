@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Hashable, Sequence
 from dataclasses import dataclass, field
 
 import networkx as nx
@@ -35,8 +36,17 @@ def count_states(states: list[State]) -> dict[str, int]:
     return counts
 
 
-def participating_cluster_size(graph: nx.Graph, states: list[State]) -> int:
-    participating_nodes = {idx for idx, state in enumerate(states) if state in {State.PARTICIPATING, State.AMPLIFYING}}
+def participating_cluster_size(
+    graph: nx.Graph,
+    states: list[State],
+    node_labels: Sequence[Hashable] | None = None,
+) -> int:
+    labels = list(graph.nodes()) if node_labels is None else list(node_labels)
+    participating_nodes = {
+        labels[idx]
+        for idx, state in enumerate(states)
+        if state in {State.PARTICIPATING, State.AMPLIFYING}
+    }
     if not participating_nodes:
         return 0
 

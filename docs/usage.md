@@ -53,7 +53,7 @@ When `infected_nodes` is provided:
 
 - the listed nodes start in the observing state;
 - `seed_count` is ignored for initial seeding;
-- the node labels may be the original labels from your graph.
+- the node labels should match the original labels from your graph.
 
 ## Run the Simulation
 
@@ -101,3 +101,5 @@ Set `random_seed` in `SimulationConfig` to reproduce the same random draws for:
 - stochastic transitions.
 
 See the scripts under `examples/` for runnable presets that combine these options in small scenarios.
+
+If you want to explore the model interactively, launch the local dashboard from `python -m challengeabm.dashboard.server` and use the browser controls to configure the run and replay the stored timeline.

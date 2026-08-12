@@ -46,7 +46,7 @@ ChallengeABM(
 
 - If `infected_nodes` is provided, those nodes are initialized as observing agents.
 - If `infected_nodes` is omitted, the model selects `seed_count` nodes at random.
-- The input graph is copied and relabeled internally to consecutive integers.
+- The input graph is copied and its original node labels are preserved.
 - Missing edge weights default to `1.0`.
 
 ### Main Methods
@@ -60,7 +60,7 @@ ChallengeABM(
 
 ### Attributes
 
-- `graph`: normalized peer network used by the simulation.
+- `graph`: copy of the user-provided peer network with original node labels preserved.
 - `agents`: list of `Agent` objects.
 - `rng`: model random-number generator.
 
@@ -135,6 +135,8 @@ TransitionParameters(
 ```
 
 The model uses logistic-style transition rules. Intercepts shift the baseline probability; the other coefficients scale how strongly a trait or exposure term contributes.
+
+For the exact transition equations, the corresponding probability expressions, and the order in which competing transitions are sampled, see [Model Notes](model.md#transition-equations).
 
 ### Parameters
 
